@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Tesouraria</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card-saldo { background: linear-gradient(45deg, #0d6efd, #0dcaf0); color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>💰 Sistema de Doações</h2>
+        <button class="btn btn-outline-primary" onclick="carregarDados()">🔄 Atualizar</button>
+    </div>
+
+    <div class="card card-saldo mb-4 shadow">
+        <div class="card-body text-center">
+            <button class="btn btn-light mt-3 fw-bold text-primary" onclick="realizarSaque()">
+                💸 Solicitar Saque
+            </button>
+            <h5 class="card-title">Saldo Disponível (Asaas)</h5>
+            <h1 class="display-4" id="saldoValor">R$ ...</h1>
+            <p class="small">Líquido (já descontado taxas)</p>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-white">
+            <strong>📜 Últimas Doações (Tempo Real)</strong>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>#ID</th>
+                        <th>Valor</th>
+                        <th>Data</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaCorpo">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://localhost:8080";
+
+    // Função para formatar dinheiro
+    function formatarMoeda(valor) {
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+    }
+
+    // Função para formatar data
+    function formatarData(dataIso) {
+        if(!dataIso) return "-";
+        const data = new Date(dataIso);
+        return data.toLocaleString('pt-BR');
+    }
+
+    async function carregarDados() {
+        try {
+            // 1. Busca o Saldo
+            const resSaldo = await fetch(`${API_URL}/financeiro/saldo`);
+            if (resSaldo.status === 401) {
+                alert("Sessão expirada ou senha incorreta.");
+                window.location.reload(); // Força o navegador a pedir senha de novo
+                return;
+            }
+            const dadosSaldo = await resSaldo.json();
+            document.getElementById('saldoValor').innerText = formatarMoeda(dadosSaldo.saldo);
+
+            // 2. Busca as Doações
+            const resDoacoes = await fetch(`${API_URL}/doacoes`);
+            const listaDoacoes = await resDoacoes.json();
+
+            const corpoTabela = document.getElementById('tabelaCorpo');
+            corpoTabela.innerHTML = ""; // Limpa antes de preencher
+
+            listaDoacoes.forEach(doacao => {
+                const linha = `
+                    <tr>
+                        <td>${doacao.id}</td>
+                        <td class="fw-bold text-success">${formatarMoeda(doacao.valor)}</td>
+                        <td>${formatarData(doacao.dataCriacao)}</td>
+                        <td><span class="badge bg-success">${doacao.status}</span></td>
+                    </tr>
+                `;
+                corpoTabela.innerHTML += linha;
+            });
+
+        } catch (erro) {
+            console.error("Erro ao buscar dados:", erro);
+            document.getElementById('saldoValor').innerText = "Erro";
+        }
+    }
+
+    async function realizarSaque() {
+        const valor = prompt("Qual valor deseja sacar?");
+        if (!valor) return; // Se cancelar, para aqui
+
+        // Converte "50,00" para "50.00" (formato americano que o Java gosta)
+        const valorFormatado = valor.replace(',', '.');
+
+        try {
+            const resposta = await fetch(`${API_URL}/financeiro/saque`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ valor: parseFloat(valorFormatado) })
+            });
+
+            if (resposta.ok) {
+                alert("✅ Saque solicitado com sucesso! O dinheiro cairá na conta configurada.");
+                carregarDados(); // Atualiza o saldo na tela
+            } else {
+                alert("❌ Erro ao sacar. Verifique o saldo.");
+            }
+        } catch (erro) {
+            console.error(erro);
+            alert("Erro de conexão.");
+        }
+    }
+
+    // Carrega tudo assim que a página abre
+    carregarDados();
+</script>
+
+</body>
+</html>
