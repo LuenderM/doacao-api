@@ -63,7 +63,8 @@ public class FinanceiroService {
         try {
             // Tenta buscar o saldo no Asaas
             String response = restClient.get()
-                    .uri("/finance/balance")
+                    .uri("/v3/finance/balance") 
+                    .header("access_token", asaasApiKey) 
                     .retrieve()
                     .body(String.class);
 
@@ -97,7 +98,7 @@ public class FinanceiroService {
         request.setBankAccount(bankAccount);
 
         restClient.post()
-                .uri("/api/v3/transfers")
+                .uri("/v3/transfers") 
                 .header("access_token", asaasApiKey)
                 .body(request)
                 .retrieve()
