@@ -8,6 +8,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 
@@ -55,14 +57,27 @@ public class FinanceiroService {
                 .build();
     }
 
-    public BigDecimal getSaldo() {
-        SaldoResponseDTO response = restClient.get()
-                .uri("/api/v3/finance/balance")
-                .header("access_token", asaasApiKey)
-                .retrieve()
-                .body(SaldoResponseDTO.class);
+    private static final Logger logger = LoggerFactory.getLogger(FinanceiroService.class);
 
-        return response != null ? response.getBalance() : BigDecimal.ZERO;
+    public BigDecimal getSaldo() {
+        try {
+            // Tenta buscar o saldo no Asaas
+            String response = restClient.get()
+                    .uri("/finance/balance")
+                    .retrieve()
+                    .body(String.class);
+
+            if (response != null && response.contains("balance")) {
+                String valorStr = response.split("\"balance\":")[1].split(",")[0];
+                return new BigDecimal(valorStr);
+            }
+            
+            return BigDecimal.ZERO;
+
+        } catch (Exception e) {
+            logger.error("Erro ao consultar saldo no Asaas (Retornando 0.00 para não quebrar): " + e.getMessage());
+            return BigDecimal.ZERO;
+        }
     }
 
     public void solicitarSaque(double valor) {
