@@ -69,14 +69,16 @@ public class FinanceiroService {
                     .body(String.class);
 
             if (response != null && response.contains("balance")) {
-                String valorStr = response.split("\"balance\":")[1].split(",")[0];
+                String valorStr = response.split("\"balance\":")[1].split(",")[0]
+                                          .replace("}", "")
+                                          .trim();
                 return new BigDecimal(valorStr);
             }
             
             return BigDecimal.ZERO;
 
         } catch (Exception e) {
-            logger.error("Erro ao consultar saldo no Asaas (Retornando 0.00 para não quebrar): " + e.getMessage());
+            logger.error("Erro ao consultar saldo no Asaas: " + e.getMessage());
             return BigDecimal.ZERO;
         }
     }
