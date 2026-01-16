@@ -20,7 +20,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/webhook/**").permitAll()
                 
-                .requestMatchers("/static/**", "/css/**", "/js/**", "/images/**", "/*.html", "/*.js", "/*.css").permitAll()
+                .requestMatchers("/", "/index.html", "/static/**", "/css/**", "/js/**", "/images/**", "/*.html", "/*.js", "/*.css").permitAll()
                 
                 .requestMatchers("/financeiro/**", "/doacoes/**").authenticated()
                 .anyRequest().authenticated()

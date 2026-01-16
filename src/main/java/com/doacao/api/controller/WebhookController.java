@@ -9,8 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+
 
 @RestController
 @RequestMapping("/webhook")
@@ -45,7 +46,7 @@ public class WebhookController {
                 doacao.setStatus("PAGO");
                 doacao.setIdTransacaoAsaas(idTransacao);
                 
-                doacao.setDataCriacao(LocalDateTime.now());
+                doacao.setDataCriacao(LocalDateTime.now(ZoneId.of("America/Sao_Paulo")));
                 
                 doacao.setEmail(""); 
                 doacao.setCpf("");
