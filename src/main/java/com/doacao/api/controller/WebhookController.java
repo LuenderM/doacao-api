@@ -36,7 +36,7 @@ public class WebhookController {
                 
                 double valor = paymentNode.path("value").asDouble();
                 String idTransacao = paymentNode.path("id").asText();
-                String billingType = paymentNode.path("billingType").asText(); // PIX, BOLETO, etc
+                String billingType = paymentNode.path("billingType").asText();
 
                 String nomeDoador = "Doador via " + billingType;
 
@@ -52,7 +52,6 @@ public class WebhookController {
                 doacao.setCpf("");
 
                 doacaoRepository.save(doacao);
-                System.out.println("WEBHOOK SUCESSO: Doação de R$ " + valor + " salva!");
             }
 
             return ResponseEntity.ok("Recebido com sucesso");

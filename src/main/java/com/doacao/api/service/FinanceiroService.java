@@ -1,7 +1,6 @@
 package com.doacao.api.service;
 
 import com.doacao.api.dto.BankAccountDTO;
-import com.doacao.api.dto.SaldoResponseDTO;
 import com.doacao.api.dto.TransferRequestDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -61,7 +60,6 @@ public class FinanceiroService {
 
     public BigDecimal getSaldo() {
         try {
-            // Tenta buscar o saldo no Asaas
             String response = restClient.get()
                     .uri("/v3/finance/balance") 
                     .header("access_token", asaasApiKey) 

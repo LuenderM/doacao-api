@@ -53,12 +53,10 @@
 <script>
     const API_URL = "";
 
-    // Função para formatar dinheiro
     function formatarMoeda(valor) {
         return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
     }
 
-    // Função para formatar data
     function formatarData(dataIso) {
         if(!dataIso) return "-";
         const data = new Date(dataIso);
@@ -67,26 +65,24 @@
 
     async function carregarDados() {
         try {
-            // 1. Busca o Saldo
             const resSaldo = await fetch(`${API_URL}/financeiro/saldo`, {
                 credentials: 'include'
             });
             if (resSaldo.status === 401) {
                 alert("Sessão expirada ou senha incorreta.");
-                window.location.reload(); // Força o navegador a pedir senha de novo
+                window.location.reload();
                 return;
             }
             const dadosSaldo = await resSaldo.json();
             document.getElementById('saldoValor').innerText = formatarMoeda(dadosSaldo.saldo);
 
-            // 2. Busca as Doações
             const resDoacoes = await fetch(`${API_URL}/doacoes`, {
                 credentials: 'include'
             });
             const listaDoacoes = await resDoacoes.json();
 
             const corpoTabela = document.getElementById('tabelaCorpo');
-            corpoTabela.innerHTML = ""; // Limpa antes de preencher
+            corpoTabela.innerHTML = "";
 
             listaDoacoes.forEach(doacao => {
                 const linha = `
@@ -108,9 +104,8 @@
 
     async function realizarSaque() {
         const valor = prompt("Qual valor deseja sacar?");
-        if (!valor) return; // Se cancelar, para aqui
+        if (!valor) return;
 
-        // Converte "50,00" para "50.00" (formato americano que o Java gosta)
         const valorFormatado = valor.replace(',', '.');
 
         try {
@@ -123,7 +118,7 @@
 
             if (resposta.ok) {
                 alert("✅ Saque solicitado com sucesso! O dinheiro cairá na conta configurada.");
-                carregarDados(); // Atualiza o saldo na tela
+                carregarDados();
             } else {
                 alert("❌ Erro ao sacar. Verifique o saldo.");
             }
@@ -133,7 +128,6 @@
         }
     }
 
-    // Carrega tudo assim que a página abre
     carregarDados();
 </script>
 
